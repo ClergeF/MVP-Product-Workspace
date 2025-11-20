@@ -26,12 +26,18 @@ if (serverConfig.cors.enabled) {
 const toolLoader = new ToolLoader(serverConfig.toolsPath);
 const schemaValidator = new SchemaValidator(serverConfig.schemasPath);
 
-// Load tools on startup
-await toolLoader.loadTools();
+// Initialize server components
+async function initialize() {
+  // Load tools on startup
+  await toolLoader.loadTools();
 
-// Load schemas
-schemaValidator.loadSchema('tool-input.schema.json');
-schemaValidator.loadSchema('tool-output.schema.json');
+  // Load schemas
+  schemaValidator.loadSchema('tool-input.schema.json');
+  schemaValidator.loadSchema('tool-output.schema.json');
+}
+
+// Run initialization
+await initialize();
 
 // Routes
 

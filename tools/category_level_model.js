@@ -20,7 +20,10 @@ export const toolMetadata = {
 export async function execute(input) {
   const { text } = input;
   
-  // Simple keyword-based categorization (in a real implementation, this would use ML)
+  // NOTE: This is a simplified example tool for demonstration purposes.
+  // In a production implementation, replace this with actual ML model inference.
+  
+  // Simple keyword-based categorization
   const categories = {
     technology: ['software', 'hardware', 'computer', 'code', 'program', 'api', 'data'],
     business: ['company', 'market', 'customer', 'sales', 'revenue', 'strategy'],
@@ -43,9 +46,11 @@ export async function execute(input) {
     }
   }
   
-  // Determine primary category and level
-  const primaryCategory = detectedCategories.length > 0 
-    ? detectedCategories[0] 
+  // Determine primary category based on highest score
+  const primaryCategory = Object.keys(categoryScores).length > 0
+    ? Object.keys(categoryScores).reduce((a, b) => 
+        categoryScores[a] > categoryScores[b] ? a : b
+      )
     : 'general';
   
   const level = detectedCategories.length >= 3 ? 'multi-domain' :
