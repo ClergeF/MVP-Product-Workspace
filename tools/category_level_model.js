@@ -1,15 +1,17 @@
 /**
  * Category Level Model Tool
- * Categorizes text into hierarchical levels and identifies categories
+ * Categorizes text using the Category Prediction API
  */
 
 export const toolMetadata = {
   name: 'category_level_model',
-  description: 'Categorizes text into hierarchical levels and identifies primary categories',
+  description: 'Categorizes text using the Category Prediction API to return category confidence scores',
   version: '1.0.0',
   inputSchema: 'tool-input.schema.json',
   outputSchema: 'tool-output.schema.json'
 };
+
+const CATEGORY_API_ENDPOINT = 'https://ClergeF-Catagorys-API.hf.space/predict';
 
 /**
  * Process the input text and categorize it
@@ -20,56 +22,41 @@ export const toolMetadata = {
 export async function execute(input) {
   const { text } = input;
   
-  // NOTE: This is a simplified example tool for demonstration purposes.
-  // In a production implementation, replace this with actual ML model inference.
-  
-  // Simple keyword-based categorization
-  const categories = {
-    technology: ['software', 'hardware', 'computer', 'code', 'program', 'api', 'data'],
-    business: ['company', 'market', 'customer', 'sales', 'revenue', 'strategy'],
-    science: ['research', 'study', 'experiment', 'theory', 'hypothesis', 'analysis'],
-    education: ['learn', 'teach', 'student', 'school', 'university', 'course'],
-    health: ['medical', 'health', 'patient', 'doctor', 'treatment', 'disease']
-  };
-  
-  const textLower = text.toLowerCase();
-  const detectedCategories = [];
-  const categoryScores = {};
-  
-  // Detect categories based on keywords
-  for (const [category, keywords] of Object.entries(categories)) {
-    const matches = keywords.filter(keyword => textLower.includes(keyword));
-    if (matches.length > 0) {
-      const score = matches.length / keywords.length;
-      categoryScores[category] = parseFloat(score.toFixed(2));
-      detectedCategories.push(category);
+  try {
+    // Call the Category Prediction API
+    const response = await fetch(CATEGORY_API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
     }
+    
+    const apiResult = await response.json();
+    
+    // Return the API response in the expected format
+    return {
+      result: {
+        education: apiResult.education,
+        innovation: apiResult.innovation,
+        faith_spirituality: apiResult.faith_spirituality,
+        business: apiResult.business,
+        family_history: apiResult.family_history,
+        community: apiResult.community,
+        health: apiResult.health
+      },
+      metadata: {
+        timestamp: new Date().toISOString(),
+        tool: toolMetadata.name
+      }
+    };
+  } catch (error) {
+    throw new Error(`Failed to call Category Prediction API: ${error.message}`);
   }
-  
-  // Determine primary category based on highest score
-  const primaryCategory = Object.keys(categoryScores).length > 0
-    ? Object.keys(categoryScores).reduce((a, b) => 
-        categoryScores[a] > categoryScores[b] ? a : b
-      )
-    : 'general';
-  
-  const level = detectedCategories.length >= 3 ? 'multi-domain' :
-                detectedCategories.length === 2 ? 'cross-domain' :
-                detectedCategories.length === 1 ? 'single-domain' : 'uncategorized';
-  
-  return {
-    result: {
-      primaryCategory,
-      level,
-      categories: detectedCategories,
-      categoryScores,
-      confidence: detectedCategories.length > 0 ? 0.75 : 0.25
-    },
-    metadata: {
-      timestamp: new Date().toISOString(),
-      tool: toolMetadata.name
-    }
-  };
 }
 
 export default { toolMetadata, execute };

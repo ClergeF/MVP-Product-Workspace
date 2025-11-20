@@ -197,10 +197,11 @@ curl -X POST http://localhost:3000/tools/action_impact_model/execute \
 ```json
 {
   "result": {
-    "impactLevel": "high",
-    "score": 0.92,
-    "analysis": "The text indicates a high impact action.",
-    "textLength": 45
+    "difficulty": 0.75,
+    "lasting_effect": 0.82,
+    "reach": 0.68,
+    "effort_vs_outcome": 0.71,
+    "impact_level": 0.79
   },
   "metadata": {
     "timestamp": "2024-01-01T00:00:00.000Z",
@@ -213,13 +214,13 @@ curl -X POST http://localhost:3000/tools/action_impact_model/execute \
 ```json
 {
   "result": {
-    "primaryCategory": "technology",
-    "level": "single-domain",
-    "categories": ["technology"],
-    "categoryScores": {
-      "technology": 0.43
-    },
-    "confidence": 0.75
+    "education": 0.12,
+    "innovation": 0.65,
+    "faith_spirituality": 0.03,
+    "business": 0.45,
+    "family_history": 0.08,
+    "community": 0.18,
+    "health": 0.09
   },
   "metadata": {
     "timestamp": "2024-01-01T00:00:00.000Z",
@@ -233,7 +234,9 @@ curl -X POST http://localhost:3000/tools/action_impact_model/execute \
 ### 1. Action Impact Model
 **Name:** `action_impact_model`
 
-Analyzes text to determine the potential impact of described actions.
+Analyzes text to determine the potential impact of described actions using the Impact Rating API.
+
+**API Endpoint:** `https://ClergeF-Impact-Rating-API.hf.space/rate`
 
 **Input:**
 ```json
@@ -243,15 +246,20 @@ Analyzes text to determine the potential impact of described actions.
 ```
 
 **Output:**
-- `impactLevel`: "high", "medium", or "low"
-- `score`: Numeric score (0-1)
-- `analysis`: Text description of the impact
-- `textLength`: Length of input text
+- `difficulty`: Numeric score indicating the difficulty of the action
+- `lasting_effect`: Numeric score for the lasting effect of the action
+- `reach`: Numeric score for the reach/scope of the action
+- `effort_vs_outcome`: Numeric score comparing effort to outcome
+- `impact_level`: Overall numeric impact level score
+
+All scores are numeric values returned by the ML model.
 
 ### 2. Category Level Model
 **Name:** `category_level_model`
 
-Categorizes text into hierarchical levels and identifies primary categories.
+Categorizes text using the Category Prediction API to return category confidence scores.
+
+**API Endpoint:** `https://ClergeF-Catagorys-API.hf.space/predict`
 
 **Input:**
 ```json
@@ -261,18 +269,15 @@ Categorizes text into hierarchical levels and identifies primary categories.
 ```
 
 **Output:**
-- `primaryCategory`: Main detected category
-- `level`: "multi-domain", "cross-domain", "single-domain", or "uncategorized"
-- `categories`: Array of detected categories
-- `categoryScores`: Score for each category
-- `confidence`: Overall confidence score (0-1)
+- `education`: Confidence score for education category
+- `innovation`: Confidence score for innovation category
+- `faith_spirituality`: Confidence score for faith/spirituality category
+- `business`: Confidence score for business category
+- `family_history`: Confidence score for family/history category
+- `community`: Confidence score for community category
+- `health`: Confidence score for health category
 
-**Categories:**
-- technology
-- business
-- science
-- education
-- health
+All scores are numeric confidence values returned by the ML model.
 
 ## ➕ Adding New Tools
 
