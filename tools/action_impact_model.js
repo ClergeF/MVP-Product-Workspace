@@ -22,6 +22,11 @@ const IMPACT_API_ENDPOINT = 'https://ClergeF-Impact-Rating-API.hf.space/rate';
 export async function execute(input) {
   const { text } = input;
   
+  // Additional input validation (server already validates via JSON schema)
+  if (!text || typeof text !== 'string' || text.trim().length === 0) {
+    throw new Error('Invalid input: text must be a non-empty string');
+  }
+  
   try {
     // Call the Impact Rating API
     const response = await fetch(IMPACT_API_ENDPOINT, {
@@ -37,6 +42,14 @@ export async function execute(input) {
     }
     
     const apiResult = await response.json();
+    
+    // Validate API response structure
+    const requiredFields = ['difficulty', 'lasting_effect', 'reach', 'effort_vs_outcome', 'impact_level'];
+    for (const field of requiredFields) {
+      if (typeof apiResult[field] !== 'number') {
+        throw new Error(`Invalid API response: missing or invalid field '${field}'`);
+      }
+    }
     
     // Return the API response in the expected format
     return {
